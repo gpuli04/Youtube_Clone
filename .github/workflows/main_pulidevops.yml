@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '20.x' # Specify Node.js 20.x
 
       - name: npm install, build, and test
         run: |
@@ -24,12 +24,8 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
-      # Optional: You can use npm prune to remove dev dependencies after build
-      - name: Clean up node_modules
-        run: npm prune --production
-
       - name: Zip artifact for deployment
-        run: zip -r release.zip . -x 'node_modules/*' '.git/*' 'test/*'
+        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -66,6 +62,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'pulidevops'  # Replace with your actual Web App name
-          slot-name: 'Production' # Remove this line if no slots are configured
+          app-name: 'pulidevops'
+          slot-name: 'Production'  # Adjust or remove if no slots are used
           package: '.'
