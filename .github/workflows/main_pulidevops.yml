@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - pulidevops
 
 on:
@@ -27,8 +24,12 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      # Optional: You can use npm prune to remove dev dependencies after build
+      - name: Clean up node_modules
+        run: npm prune --production
+
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip -r release.zip . -x 'node_modules/*' '.git/*' 'test/*'
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -43,7 +44,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write
 
     steps:
       - name: Download artifact from build job
@@ -53,19 +54,18 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_982254768A9A4A24B955A790AD8DD3E5 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2436B2B7A8D24DFF9F666C0F24CB329D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F6056CC0696446BB9C8BEA06EAD2A38C }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'pulidevops'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: 'pulidevops'  # Replace with your actual Web App name
+          slot-name: 'Production' # Remove this line if no slots are configured
+          package: '.'
